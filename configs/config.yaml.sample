@@ -1,0 +1,21 @@
+messages:
+  responses:
+    start: Welcome, %s
+    setup: Setup command will be added soon
+    unknown_command: Неизвестная команда
+  errors:
+    default: Неизвестная ошибка
+    invalid_group: Неизвестная группа
+timetable:
+  group1:
+    monday:
+      # Первая пара
+      - [[Предмет, Лекция, Класс, Препод],  # Четная неделя
+         [Предмет, Лекция, Класс, Препод]]  # Нечетная неделя
+      # Вторая пара
+      - [[Предмет, Лекция, Класс, Препод]]
+      # и тд...
+    thuesday:
+    # и тд...
+  group2:   
+  # и тд...

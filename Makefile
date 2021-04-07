@@ -3,7 +3,7 @@ dep:
 	go mod download
 
 build: dep
-	go build -o ./.bin/telegram-bot ./main.go
+	go build -o ./.bin/telegram-bot.exe
 
 run:
-	go run main.go
+	go run .

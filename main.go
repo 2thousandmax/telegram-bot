@@ -1,32 +1,32 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
-	"time"
+	"os"
 
-	"gopkg.in/yaml.v2"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type Response struct {
-	TimeStamp time.Time                                `yaml:"timestamp"`
-	Lecturers []string                                 `yaml:"lecturers"`
-	Classes   []string                                 `yaml:"classes"`
-	Timetable map[string]map[string][][][4]interface{} `yaml:"timetable"`
-}
-
 func main() {
-	r := Response{}
- 
-	f, err := ioutil.ReadFile("data.yaml")
+	config, err := NewConfig("configs/config.yaml")
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
-	if err := yaml.Unmarshal(f, &r); err != nil {
-		log.Fatalf("error: %v", err)
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	log.Printf("Token: %s", token)
+
+	botApi, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Fatalf("Authentication error: %v", err)
 	}
 
-	fmt.Printf("%+v\n", r)
+	botApi.Debug = true
+	log.Printf("Authorized on account %s", botApi.Self.UserName)
+
+	bot := NewTelegramBot(botApi, config.Data, config.Messages)
+
+	if err := bot.Start(); err != nil {
+		log.Fatalf("Bot error: %v", err)
+	}
 }
