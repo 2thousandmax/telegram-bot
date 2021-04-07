@@ -54,6 +54,7 @@ func (b *Bot) Start() error {
 var keyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("Расписание"),
+		tgbotapi.NewKeyboardButton("Список предметов"),
 	),
 )
 
