@@ -8,6 +8,7 @@ config.yaml
 *.env
 
 # Database files
+.bolt
 *.pgdata
 *.db
 

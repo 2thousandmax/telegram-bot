@@ -5,14 +5,14 @@ import (
 )
 
 var (
-	invalidGroupError = errors.New("Неизвестная группа")
+	errorInvalidGroup = errors.New("groupError")
 )
 
 func (b *Bot) handleError(chatID int64, err error) {
 	var messageText string
 
 	switch err {
-	case invalidGroupError:
+	case errorInvalidGroup:
 		messageText = b.messages.Errors.InvalidGroup
 	default:
 		messageText = b.messages.Errors.Default

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -9,9 +10,10 @@ import (
 )
 
 const (
-	commandStart = "start"
-	commandSetup = "setup"
-	messageRasp = "Расписание"
+	commandStart    = "start"
+	commandSetup    = "setgroup"
+	messageRasp     = "Расписание"
+	messageSubjects = "Список предметов"
 )
 
 func (b *Bot) handleCommand(message *tgbotapi.Message) error {
@@ -26,47 +28,80 @@ func (b *Bot) handleCommand(message *tgbotapi.Message) error {
 }
 
 func (b *Bot) handleStartCommand(message *tgbotapi.Message) error {
-	// id := message.From.ID
-	userName := message.From.UserName
-	text := fmt.Sprintf(b.messages.Responses.Start, userName)
+	id := message.From.ID
+	username := message.From.UserName
+
+	if err := b.storage.Save(id, username); err != nil {
+		return err
+	}
+
+	text := fmt.Sprintf(b.messages.Responses.Start, username)
 
 	return b.SendTextMessage(message.Chat.ID, text)
 }
 
+// Handle `/setup` command
 func (b *Bot) handleSetupCommand(message *tgbotapi.Message) error {
-	return b.SendTextMessage(message.Chat.ID, b.messages.Responses.Setup)
+	id := message.From.ID
+	group := strings.Split(message.Text, " ")
+	if len(group) < 2 {
+		return errorInvalidGroup
+	}
+
+	matched, _ := regexp.MatchString(`ИЗ-\d\d-\d`, group[1])
+	if !matched {
+		return errorInvalidGroup
+	}
+
+	if err := b.storage.SetGroup(id, group[1], UsersBucket); err != nil {
+		return err
+	}
+
+	msgText := fmt.Sprintf(b.messages.Responses.Setup, group[1])
+
+	return b.SendTextMessage(message.Chat.ID, msgText)
 }
 
+// Handle unknown command
 func (b *Bot) handleUnknownCommand(message *tgbotapi.Message) error {
 	return b.SendTextMessage(message.Chat.ID, b.messages.Responses.UnknownCommand)
 }
 
+// Handle new message
 func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 	switch message.Text {
 	case messageRasp:
 		return b.handleRaspMessage(message, b.data)
+	case messageSubjects:
+		return b.handleSubjectsMessage(message, b.data)
 	default:
 		// TODO separate function
 		return b.SendTextMessage(message.Chat.ID, b.messages.Responses.UnknownCommand)
 	}
 }
 
+// Handle `Расписание` message
 func (b *Bot) handleRaspMessage(message *tgbotapi.Message, data Data) error {
-	// TODO: get group from storage
-	group := "IZ-21-1"
+	id := message.From.ID
+	group, err := b.storage.GetGroup(id, UsersBucket)
+	if err != nil {
+		// log.Fatal(err)
+		return err
+	}
+
 	weekDay := strings.ToLower(time.Now().Weekday().String())
 	lesonsTable := data.Timetable[group][weekDay]
-	weekType := IsEvenWeek(time.Now())
+	weekTypeInt, weekTypeStr := IsEvenWeek(time.Now())
 
 	mainTemplate := fmt.Sprintf("*Расписание для группы %s*\n", group)
-	mainTemplate += fmt.Sprintf("Неделя: %v\n", weekType)
-	mainTemplate += fmt.Sprintf("День недели: %v\n\n", weekDay)
+	mainTemplate += fmt.Sprintf("Неделя: %v\n", weekTypeStr)
+	mainTemplate += fmt.Sprintf("День недели: %v\n\n", weekDayRu(weekDay))
 
 	for i := range lesonsTable {
 		var classes [4]interface{}
 
 		if len(lesonsTable[i]) > 1 {
-			classes = lesonsTable[i][weekType]
+			classes = lesonsTable[i][weekTypeInt]
 		} else {
 			classes = lesonsTable[i][0]
 		}
@@ -79,11 +114,11 @@ func (b *Bot) handleRaspMessage(message *tgbotapi.Message, data Data) error {
 	return b.SendTextMessage(message.Chat.ID, mainTemplate)
 }
 
-// IsEvenWeek check is current week even
-func IsEvenWeek(now time.Time) int {
-	if _, thisWeek := now.ISOWeek(); thisWeek%10 != 0 {
-		return 0
+// Handle `Список предметов` message
+func (b *Bot) handleSubjectsMessage(message *tgbotapi.Message, data Data) error {
+	var msgText string
+	for i, v := range data.Classes {
+		msgText += fmt.Sprintf("%v. %s\n", i+1, v)
 	}
-
-	return 1
+	return b.SendTextMessage(message.Chat.ID, msgText)
 }

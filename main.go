@@ -13,6 +13,13 @@ func main() {
 		log.Panic(err)
 	}
 
+	db, err := initBoltDB()
+	if err != nil {
+		log.Fatalf("Database error: %v", err)
+	}
+
+	usersStorage := NewUserStorage(db)
+
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	log.Printf("Token: %s", token)
 
@@ -23,8 +30,12 @@ func main() {
 
 	botApi.Debug = true
 	log.Printf("Authorized on account %s", botApi.Self.UserName)
+	
+	// botApi.SetChatDescription(tgbotapi.SetChatDescriptionConfig{
 
-	bot := NewTelegramBot(botApi, config.Data, config.Messages)
+	// })
+
+	bot := NewTelegramBot(botApi, config.Data, config.Messages, usersStorage)
 
 	if err := bot.Start(); err != nil {
 		log.Fatalf("Bot error: %v", err)

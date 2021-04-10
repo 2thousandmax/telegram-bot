@@ -8,13 +8,15 @@ type Bot struct {
 	bot      *tgbotapi.BotAPI
 	data     Data
 	messages Messages
+	storage  *UserStorage
 }
 
-func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages) *Bot {
+func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserStorage) *Bot {
 	return &Bot{
 		bot:      bot,
 		data:     d,
 		messages: msg,
+		storage:  storage,
 	}
 }
 
