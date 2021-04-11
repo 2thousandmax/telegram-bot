@@ -21,6 +21,7 @@ func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserSto
 }
 
 func (b *Bot) Start() error {
+	// LongPolling
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -28,6 +29,22 @@ func (b *Bot) Start() error {
 	if err != nil {
 		return err
 	}
+
+	// // WebHooks
+	// url := os.Getenv("PUBLIC_URL")
+	// port := os.Getenv("PORT")
+	// log.Printf("PORT: %s\nURL: %s",port, url)
+
+	// token := os.Getenv("TELEGRAM_BOT_TOKEN")
+
+	// _, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf("https://%s/%s", url, token)))
+	// if err != nil {
+	// 	log.Fatalf("Problem in setting Webhook %v", err)
+	// }
+
+	// updates := b.bot.ListenForWebhook("/" + token)
+
+	// go http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 
 	for update := range updates {
 		// Ignore any non-Message Updates
