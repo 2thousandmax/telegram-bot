@@ -22,6 +22,8 @@ func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserSto
 
 func (b *Bot) Start() error {
 	// LongPolling
+	// b.bot.RemoveWebhook()
+	
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 

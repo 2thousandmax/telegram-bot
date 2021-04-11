@@ -47,7 +47,7 @@ func (s *UserStorage) GetGroup(id int, bucket Bucket) (string, error) {
 	})
 
 	if group == "" {
-		err = errorInvalidGroup
+		err = errorGroupNotFound
 	}
 
 	return group, err

@@ -31,8 +31,9 @@ type Responses struct {
 }
 
 type Errors struct {
-	Default      string `yaml:"default"`
-	InvalidGroup string `yaml:"invalid_group"`
+	Default       string `yaml:"default"`
+	InvalidGroup  string `yaml:"invalid_group"`
+	GroupNotFound string `yaml:"group_not_found"`
 }
 
 func NewConfig(file string) (*Config, error) {

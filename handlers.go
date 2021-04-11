@@ -98,17 +98,19 @@ func (b *Bot) handleRaspMessage(message *tgbotapi.Message, data Data) error {
 	mainTemplate += fmt.Sprintf("День недели: %v\n\n", weekDayRu(weekDay))
 
 	for i := range lesonsTable {
-		var classes [4]interface{}
-
+		classes := lesonsTable[i][0]
 		if len(lesonsTable[i]) > 1 {
 			classes = lesonsTable[i][weekTypeInt]
-		} else {
-			classes = lesonsTable[i][0]
 		}
 
-		mainTemplate += fmt.Sprintf("*%v. %s\n*", i+1, classes[0])
-		mainTemplate += fmt.Sprintf("│ %s: %v\n", classes[1], classes[2])
-		mainTemplate += fmt.Sprintf("└ %s\n\n", classes[3])
+		if weekDay != "sunday" {
+			mainTemplate += fmt.Sprintf("*%v. %s\n*", i+1, classes[0])
+			mainTemplate += fmt.Sprintf("│ %s: %v\n", classes[1], classes[2])
+			mainTemplate += fmt.Sprintf("└ %s\n\n", classes[3])
+		} else {
+			mainTemplate += "Chill out! Пар нет"
+		}
+
 	}
 
 	return b.SendTextMessage(message.Chat.ID, mainTemplate)
@@ -119,6 +121,7 @@ func (b *Bot) handleSubjectsMessage(message *tgbotapi.Message, data Data) error 
 	var msgText string
 	for i, v := range data.Classes {
 		msgText += fmt.Sprintf("%v. %s\n", i+1, v)
+		// msgText += fmt.Sprintf("%v. %s\n └ %s\n", i+1, v, data.Lecturers[i])
 	}
 	return b.SendTextMessage(message.Chat.ID, msgText)
 }

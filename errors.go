@@ -6,6 +6,7 @@ import (
 
 var (
 	errorInvalidGroup = errors.New("groupError")
+	errorGroupNotFound =  errors.New("groupNotFound")
 )
 
 func (b *Bot) handleError(chatID int64, err error) {
@@ -14,6 +15,8 @@ func (b *Bot) handleError(chatID int64, err error) {
 	switch err {
 	case errorInvalidGroup:
 		messageText = b.messages.Errors.InvalidGroup
+	case errorGroupNotFound:
+		messageText = b.messages.Errors.GroupNotFound
 	default:
 		messageText = b.messages.Errors.Default
 	}

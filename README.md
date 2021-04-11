@@ -12,4 +12,5 @@ To build project as binary, you can run:
     make build
 
 # TODO
+- [x] Что если нет первой пары
 - [ ] goembed 

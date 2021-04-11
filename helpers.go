@@ -29,9 +29,9 @@ func weekDayRu(weekDay string) string {
 		text = "Четверг"
 	case "friday":
 		text = "Пятница"
-	case "sunday":
-		text = "Суббота"
 	case "saturday":
+		text = "Суббота"
+	case "sunday":
 		text = "Воскресенье"
 	}
 
