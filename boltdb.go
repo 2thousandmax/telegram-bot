@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -20,8 +21,17 @@ type User struct {
 	UpdatedAt time.Time
 }
 
+const (
+	path = "bolt"
+	mode = 0700
+)
+
 func initBoltDB() (*bolt.DB, error) {
-	db, err := bolt.Open(".bolt/bot.db", 0600, nil)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, mode)
+	}
+
+	db, err := bolt.Open("bolt/bot.db", 0600, nil)
 	if err != nil {
 		return nil, err
 	}
