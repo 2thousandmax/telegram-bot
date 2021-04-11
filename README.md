@@ -10,3 +10,6 @@ Create `config.yaml` file in the **configs** folder. For reference see `config.y
 To build project as binary, you can run:
 
     make build
+
+# TODO
+- [ ] goembed 

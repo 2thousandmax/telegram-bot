@@ -1,3 +1,4 @@
+.src
 config.yaml
 
 # IDEs files
@@ -8,7 +9,7 @@ config.yaml
 *.env
 
 # Database files
-.bolt
+bolt
 *.pgdata
 *.db
 
