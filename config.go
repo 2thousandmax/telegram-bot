@@ -14,6 +14,7 @@ type Config struct {
 }
 
 type Data struct {
+	Rings     []string                                 `yaml:"rings"`
 	Lecturers []string                                 `yaml:"lecturers"`
 	Classes   []string                                 `yaml:"classes"`
 	Timetable map[string]map[string][][][4]interface{} `yaml:"timetable"`
@@ -48,7 +49,7 @@ func NewConfig(file string) (*Config, error) {
 	}
 
 	fmt.Println("Successfully unmarshalled")
-
+	fmt.Println(cfg.Data.Rings)
 	d, err := yaml.Marshal(&cfg)
 	if err != nil {
 		fmt.Printf("error: %v", err)
