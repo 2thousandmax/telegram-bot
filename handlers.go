@@ -2,69 +2,27 @@ package main
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 const (
-	commandStart    = "start"
-	commandSetup    = "setgroup"
-	messageRasp     = "Расписание"
-	messageSubjects = "Список предметов"
+	commandStart     = "start"
+	messageRasp      = "Расписание"
+	messageSubjects  = "Список предметов"
+	callbackTomorrow = "Завтра"
+	callbackBack     = "Назад"
 )
 
+// Handle new command
 func (b *Bot) handleCommand(message *tgbotapi.Message) error {
 	switch message.Command() {
 	case commandStart:
 		return b.handleStartCommand(message)
-	case commandSetup:
-		return b.handleSetupCommand(message)
 	default:
-		return b.handleUnknownCommand(message)
+		return ErrUnknownCommand
 	}
-}
-
-func (b *Bot) handleStartCommand(message *tgbotapi.Message) error {
-	id := message.From.ID
-	username := message.From.UserName
-
-	if err := b.storage.Save(id, username); err != nil {
-		return err
-	}
-
-	text := fmt.Sprintf(b.messages.Responses.Start, username)
-
-	return b.SendTextMessage(message.Chat.ID, text)
-}
-
-// Handle `/setup` command
-func (b *Bot) handleSetupCommand(message *tgbotapi.Message) error {
-	id := message.From.ID
-	group := strings.Split(message.Text, " ")
-	if len(group) < 2 {
-		return errorInvalidGroup
-	}
-
-	matched, _ := regexp.MatchString(`ИЗ-\d\d-\d`, group[1])
-	if !matched {
-		return errorInvalidGroup
-	}
-
-	if err := b.storage.SetGroup(id, group[1], UsersBucket); err != nil {
-		return err
-	}
-
-	msgText := fmt.Sprintf(b.messages.Responses.Setup, group[1])
-
-	return b.SendTextMessage(message.Chat.ID, msgText)
-}
-
-// Handle unknown command
-func (b *Bot) handleUnknownCommand(message *tgbotapi.Message) error {
-	return b.SendTextMessage(message.Chat.ID, b.messages.Responses.UnknownCommand)
 }
 
 // Handle new message
@@ -75,53 +33,109 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 	case messageSubjects:
 		return b.handleSubjectsMessage(message, b.data)
 	default:
-		// TODO separate function
-		return b.SendTextMessage(message.Chat.ID, b.messages.Responses.UnknownCommand)
+		return ErrUnknownCommand
 	}
+}
+
+// Handle new callback query
+func (b *Bot) handleCallbackQuery(callback *tgbotapi.CallbackQuery) error {
+	switch callback.Data {
+	case "ИЗ-21-1":
+		return b.handleGroupCallback(callback)
+	case "ИЗ-21-2":
+		return b.handleGroupCallback(callback)
+	case callbackTomorrow:
+		return b.handleTomorrowCallback(callback)
+	case callbackBack:
+		return b.handleBackCallback(callback)
+	default:
+		return ErrUnknownCommand
+	}
+}
+
+// Handle group callback
+func (b *Bot) handleGroupCallback(callback *tgbotapi.CallbackQuery) error {
+	id := callback.From.ID
+	group := callback.Data
+
+	if err := b.storage.SaveGroup(id, group); err != nil {
+		return ErrInternalError
+	}
+
+	date := time.Now()
+	msgText := ComposeMessage(group, date, b.data)
+
+	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Завтра →", callbackTomorrow),
+		),
+	)
+
+	return b.EditMessage(callback.Message.Chat.ID, callback.Message.MessageID, msgText, &inlineKeyboard)
+}
+
+// Handle tomorrow callback
+func (b *Bot) handleTomorrowCallback(callback *tgbotapi.CallbackQuery) error {
+	// Check if message old
+	group, err := b.storage.GetGroup(callback.From.ID)
+	if err != nil {
+		return ErrMessageOutdated
+	}
+
+	date := time.Now().AddDate(0, 0, 1)
+	msgText := ComposeMessage(group, date, b.data)
+
+	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("← Назад", callbackBack),
+		),
+	)
+
+	return b.EditMessage(callback.Message.Chat.ID, callback.Message.MessageID, msgText, &inlineKeyboard) // TODO keyboard
+}
+
+// Handle back callback
+func (b *Bot) handleBackCallback(callback *tgbotapi.CallbackQuery) error {
+	id := callback.From.ID
+
+	group, err := b.storage.GetGroup(id)
+	if err != nil {
+		return ErrMessageOutdated
+	}
+
+	date := time.Now()
+	msgText := ComposeMessage(group, date, b.data)
+
+	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Завтра →", callbackTomorrow),
+		),
+	)
+
+	return b.EditMessage(callback.Message.Chat.ID, callback.Message.MessageID, msgText, &inlineKeyboard)
+}
+
+// Handle `/start` command
+func (b *Bot) handleStartCommand(message *tgbotapi.Message) error {
+	username := message.From.UserName
+
+	text := fmt.Sprintf(b.messages.Responses.Start, username)
+
+	return b.SendTextMessage(message.Chat.ID, text, replyKeyboard)
 }
 
 // Handle `Расписание` message
 func (b *Bot) handleRaspMessage(message *tgbotapi.Message, data Data) error {
-	id := message.From.ID
-	group, err := b.storage.GetGroup(id, UsersBucket)
-	if err != nil {
-		// log.Fatal(err)
-		return err
-	}
+	msgText := "Расписание"
 
-	weekDay := strings.ToLower(time.Now().Weekday().String())
-	lesonsTable := data.Timetable[group][weekDay]
-	weekTypeInt, weekTypeStr := IsEvenWeek(time.Now())
-
-	mainTemplate := fmt.Sprintf("*Расписание для группы %s*\n", group)
-	mainTemplate += fmt.Sprintf("Неделя: %v\n", weekTypeStr)
-	mainTemplate += fmt.Sprintf("День недели: %v\n\n", weekDayRu(weekDay))
-
-	for i := range lesonsTable {
-		classes := lesonsTable[i][0]
-		if len(lesonsTable[i]) > 1 {
-			classes = lesonsTable[i][weekTypeInt]
-		}
-
-		if weekDay != "sunday" {
-			mainTemplate += fmt.Sprintf("*%v. %s\n*", i+1, classes[0])
-			mainTemplate += fmt.Sprintf("│ %s: %v\n", classes[1], classes[2])
-			mainTemplate += fmt.Sprintf("└ %s\n\n", classes[3])
-		} else {
-			mainTemplate += "Chill out! Пар нет"
-		}
-
-	}
-
-	return b.SendTextMessage(message.Chat.ID, mainTemplate)
+	return b.SendTextMessage(message.Chat.ID, msgText, inlineKeyboardGroup)
 }
 
 // Handle `Список предметов` message
 func (b *Bot) handleSubjectsMessage(message *tgbotapi.Message, data Data) error {
 	var msgText string
 	for i, v := range data.Classes {
-		msgText += fmt.Sprintf("%v. %s\n", i+1, v)
-		// msgText += fmt.Sprintf("%v. %s\n └ %s\n", i+1, v, data.Lecturers[i])
+		msgText += fmt.Sprintf("*%v*. %s*(%s)*\n", i+1, v, data.Controls[i])
 	}
-	return b.SendTextMessage(message.Chat.ID, msgText)
+	return b.SendTextMessage(message.Chat.ID, msgText, replyKeyboard)
 }

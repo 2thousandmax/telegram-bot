@@ -21,9 +21,10 @@ func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserSto
 }
 
 func (b *Bot) Start() error {
-	// LongPolling
 	// b.bot.RemoveWebhook()
-	
+
+	// LongPolling
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -35,7 +36,7 @@ func (b *Bot) Start() error {
 	// // WebHooks
 	// url := os.Getenv("PUBLIC_URL")
 	// port := os.Getenv("PORT")
-	// log.Printf("PORT: %s\nURL: %s",port, url)
+	// log.Printf("PORT: %s\nURL: %s", port, url)
 
 	// token := os.Getenv("TELEGRAM_BOT_TOKEN")
 
@@ -49,6 +50,14 @@ func (b *Bot) Start() error {
 	// go http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 
 	for update := range updates {
+		// Handle callback queries
+		if update.CallbackQuery != nil {
+			if err := b.handleCallbackQuery(update.CallbackQuery); err != nil {
+				b.handleError(update.Message.Chat.ID, err)
+			}
+
+		}
+
 		// Ignore any non-Message Updates
 		if update.Message == nil {
 			continue
@@ -72,17 +81,41 @@ func (b *Bot) Start() error {
 	return nil
 }
 
-var keyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Расписание"),
-		tgbotapi.NewKeyboardButton("Список предметов"),
-	),
+var (
+	replyKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("Расписание"),
+			tgbotapi.NewKeyboardButton("Список предметов"),
+		),
+	)
+
+	inlineKeyboardGroup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("ИЗ-21-1", "ИЗ-21-1"),
+			tgbotapi.NewInlineKeyboardButtonData("ИЗ-21-2", "ИЗ-21-2"),
+		),
+	)
+
+	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Завтра →", callbackTomorrow),
+		),
+	)
 )
 
-func (b *Bot) SendTextMessage(id int64, text string) error {
+func (b *Bot) SendTextMessage(id int64, text string, replyMarkup interface{}) error {
 	msg := tgbotapi.NewMessage(id, text)
-	msg.ReplyMarkup = keyboard
 	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = replyMarkup
+
+	_, err := b.bot.Send(msg)
+	return err
+}
+
+func (b *Bot) EditMessage(chatID int64, msgID int, text string, inlineKeyboard *tgbotapi.InlineKeyboardMarkup) error {
+	msg := tgbotapi.NewEditMessageText(chatID, msgID, text)
+	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = inlineKeyboard
 
 	_, err := b.bot.Send(msg)
 	return err
