@@ -17,6 +17,7 @@ type Data struct {
 	Rings     []string                                 `yaml:"rings"`
 	Lecturers []string                                 `yaml:"lecturers"`
 	Classes   []string                                 `yaml:"classes"`
+	Controls  []string                                 `yaml:"controls"`
 	Timetable map[string]map[string][][][4]interface{} `yaml:"timetable"`
 }
 
@@ -32,9 +33,10 @@ type Responses struct {
 }
 
 type Errors struct {
-	Default       string `yaml:"default"`
-	InvalidGroup  string `yaml:"invalid_group"`
-	GroupNotFound string `yaml:"group_not_found"`
+	Default         string `yaml:"default"`
+	InvalidGroup    string `yaml:"invalid_group"`
+	GroupNotFound   string `yaml:"group_not_found"`
+	MessageOutdated string `yaml:"message_outdated"`
 }
 
 func NewConfig(file string) (*Config, error) {
