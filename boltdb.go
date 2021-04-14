@@ -36,16 +36,5 @@ func initBoltDB() (*bolt.DB, error) {
 		return nil, err
 	}
 
-	if err := db.Batch(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(UsersBucket))
-		if err != nil {
-			return err
-		}
-
-		return err
-	}); err != nil {
-		return nil, err
-	}
-
 	return db, nil
 }
