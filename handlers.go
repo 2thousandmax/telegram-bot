@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -45,14 +46,18 @@ func (b *Bot) handleCallbackQuery(callback *tgbotapi.CallbackQuery) error {
 	// if timeout.Unix() < now.Unix() {
 	// 	return ErrMessageOutdated
 	// }
-	switch callback.Data {
-	case "ИЗ-21-1":
+
+	matched, err := regexp.MatchString("ИЗ-2[12]-[12]", callback.Data)
+	if err != nil {
+		return ErrInternalError
+	}
+
+	switch {
+	case matched:
 		return b.handleGroupCallback(callback)
-	case "ИЗ-21-2":
-		return b.handleGroupCallback(callback)
-	case callbackTomorrow:
+	case (callback.Data == callbackTomorrow):
 		return b.handleTomorrowCallback(callback)
-	case callbackBack:
+	case (callback.Data == callbackBack):
 		return b.handleBackCallback(callback)
 	default:
 		return ErrUnknownCommand

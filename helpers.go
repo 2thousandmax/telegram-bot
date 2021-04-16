@@ -16,6 +16,7 @@ func IsEvenWeek(now time.Time) (int, string) {
 	return 1, "Числитель"
 }
 
+// ComposeMessage prepare text message
 func ComposeMessage(group string, date time.Time, data Data) string {
 	weekDay := strings.ToLower(date.Weekday().String())
 
@@ -44,7 +45,7 @@ func ComposeMessage(group string, date time.Time, data Data) string {
 	return msgText
 }
 
-// weekDayRu translate weekday to russian language
+// weekDayRu translate weekday to russian equivalent
 func weekDayRu(weekDay string) string {
 	var text string
 
