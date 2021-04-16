@@ -5,7 +5,9 @@ Set environment variables with the following values:
 
     TELEGRAM_BOT_TOKEN=<your telegram token>
     PORT=<port>
-    PUBLIC_URL=<url> or <your heroku app name>.herokuapp.com    # if you use heroku
+    PUBLIC_URL=<url>
+    # if you use heroku
+    PUBLIC_URL=<your heroku app name>.herokuapp.com
 
 Create `config.yaml` file in the **configs** folder. For reference see `config.yaml.sample`
 
@@ -20,6 +22,6 @@ To build project as binary, you can run:
 - [ ] Logger
 - [ ] Write unit tests
 - [ ] New features 
-  - [ ] Inline buttons for tomorrow and yesterday classes
+  - [x] Inline buttons for tomorrow and yesterday classes
   - [ ] Send whole schedule
   - [ ] Send classes and lecturers together
