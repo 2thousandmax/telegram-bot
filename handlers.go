@@ -39,6 +39,12 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 
 // Handle new callback query
 func (b *Bot) handleCallbackQuery(callback *tgbotapi.CallbackQuery) error {
+	// timeout := time.Unix(int64(callback.Message.Date), 0).Add(20 * time.Minute)
+	// now := time.Now()
+
+	// if timeout.Unix() < now.Unix() {
+	// 	return ErrMessageOutdated
+	// }
 	switch callback.Data {
 	case "ИЗ-21-1":
 		return b.handleGroupCallback(callback)
@@ -74,11 +80,15 @@ func (b *Bot) handleGroupCallback(callback *tgbotapi.CallbackQuery) error {
 	return b.EditMessage(callback.Message.Chat.ID, callback.Message.MessageID, msgText, &inlineKeyboard)
 }
 
-// Handle tomorrow callback
+// Handle `Завтра` callback
 func (b *Bot) handleTomorrowCallback(callback *tgbotapi.CallbackQuery) error {
 	// Check if message old
 	group, err := b.storage.GetGroup(callback.From.ID)
 	if err != nil {
+		return ErrInternalError
+	}
+
+	if group == "" {
 		return ErrMessageOutdated
 	}
 
@@ -94,12 +104,16 @@ func (b *Bot) handleTomorrowCallback(callback *tgbotapi.CallbackQuery) error {
 	return b.EditMessage(callback.Message.Chat.ID, callback.Message.MessageID, msgText, &inlineKeyboard) // TODO keyboard
 }
 
-// Handle back callback
+// Handle `Назад` callback
 func (b *Bot) handleBackCallback(callback *tgbotapi.CallbackQuery) error {
 	id := callback.From.ID
 
 	group, err := b.storage.GetGroup(id)
 	if err != nil {
+		return ErrInternalError
+	}
+
+	if group == "" {
 		return ErrMessageOutdated
 	}
 

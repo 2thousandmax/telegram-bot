@@ -14,6 +14,15 @@ func NewUserStorage(db *bolt.DB) *UserStorage {
 	}
 }
 
+func (s *UserStorage) CreateUserBucket(id int) error {
+	err := s.db.Batch(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists(itob(id))
+		return err
+	})
+
+	return err
+}
+
 func (s *UserStorage) SaveGroup(id int, group string) error {
 	err := s.db.Batch(func(tx *bolt.Tx) error {
 		u, err := tx.CreateBucketIfNotExists(itob(id))
@@ -30,9 +39,14 @@ func (s *UserStorage) SaveGroup(id int, group string) error {
 func (s *UserStorage) GetGroup(id int) (string, error) {
 	var group string
 
-	err := s.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(itob(id))
+	err := s.db.Batch(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(itob(id))
+		if err != nil {
+			return err
+		}
+
 		group = string(b.Get([]byte("group")))
+
 		return nil
 	})
 
