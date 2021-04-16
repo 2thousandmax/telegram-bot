@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -23,31 +28,30 @@ func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserSto
 func (b *Bot) Start() error {
 	// b.bot.RemoveWebhook()
 
-	// LongPolling
+	// // LongPolling
+	// u := tgbotapi.NewUpdate(0)
+	// u.Timeout = 60
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates, err := b.bot.GetUpdatesChan(u)
-	if err != nil {
-		return err
-	}
-
-	// // WebHooks
-	// url := os.Getenv("PUBLIC_URL")
-	// port := os.Getenv("PORT")
-	// log.Printf("PORT: %s\nURL: %s", port, url)
-
-	// token := os.Getenv("TELEGRAM_BOT_TOKEN")
-
-	// _, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf("https://%s/%s", url, token)))
+	// updates, err := b.bot.GetUpdatesChan(u)
 	// if err != nil {
-	// 	log.Fatalf("Problem in setting Webhook %v", err)
+	// 	return err
 	// }
 
-	// updates := b.bot.ListenForWebhook("/" + token)
+	// WebHooks
+	url := os.Getenv("PUBLIC_URL")
+	port := os.Getenv("PORT")
+	log.Printf("PORT: %s\nURL: %s", port, url)
 
-	// go http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+
+	_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf("https://%s/%s", url, token)))
+	if err != nil {
+		log.Fatalf("Problem in setting Webhook %v", err)
+	}
+
+	updates := b.bot.ListenForWebhook("/" + token)
+
+	go http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 
 	for update := range updates {
 		// Handle callback queries
