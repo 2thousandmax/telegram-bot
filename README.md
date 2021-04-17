@@ -9,7 +9,7 @@ Set environment variables with the following values:
     # if you use heroku
     PUBLIC_URL=<your heroku app name>.herokuapp.com
 
-Create `config.yaml` file in the **configs** folder. For reference see `config.yaml.sample`
+Create `config.yaml` file in the **configs** folder. For reference see `config.example.yaml`
 
 To build project as binary, you can run:
 
