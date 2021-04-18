@@ -27,21 +27,23 @@ func ComposeMessage(group string, date time.Time, data Data) string {
 	msgText += fmt.Sprintf("Неделя: *%v*\n", weekTypeStr)
 	msgText += fmt.Sprintf("День недели: *%v*\n\n", weekDayRu(weekDay))
 
+	if weekDay == "sunday" {
+		msgText += "Chill out! Пар нет"
+		return msgText
+	}
+
 	for i := range lesonsTable {
 		classes := lesonsTable[i][0]
 		if len(lesonsTable[i]) > 1 {
 			classes = lesonsTable[i][weekTypeInt]
 		}
 
-		if weekDay != "sunday" {
-			msgText += fmt.Sprintf("*%v. %s*\n", i+1, classes[0])
-			msgText += fmt.Sprintf("├ Время: *%v*\n", data.Rings[i])
-			msgText += fmt.Sprintf("├ %s: *%v*\n", classes[1], classes[2])
-			msgText += fmt.Sprintf("└ %s\n\n", classes[3])
-		} else {
-			msgText += "Chill out! Пар нет"
-		}
+		msgText += fmt.Sprintf("*%v. %s*\n", i+1, classes[0])
+		msgText += fmt.Sprintf("├ Время: *%v*\n", data.Rings[i])
+		msgText += fmt.Sprintf("├ %s: *%v*\n", classes[1], classes[2])
+		msgText += fmt.Sprintf("└ %s\n\n", classes[3])
 	}
+
 	return msgText
 }
 
