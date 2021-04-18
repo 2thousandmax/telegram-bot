@@ -96,6 +96,8 @@ var (
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("ИЗ-21-1", "ИЗ-21-1"),
 			tgbotapi.NewInlineKeyboardButtonData("ИЗ-21-2", "ИЗ-21-2"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("ИЗ-22-1", "ИЗ-22-1"),
 			tgbotapi.NewInlineKeyboardButtonData("ИЗ-22-2", "ИЗ-22-2"),
 		),
