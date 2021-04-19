@@ -10,10 +10,10 @@ import (
 // IsEvenWeek check is current week even
 func IsEvenWeek(now time.Time) (int, string) {
 	if _, thisWeek := now.ISOWeek(); thisWeek%10 != 0 {
-		return 0, "Знаменатель"
-	}
 
-	return 1, "Числитель"
+		return 1, "Знаменатель"
+	}
+	return 0, "Числитель"
 }
 
 // ComposeMessage prepare text message
