@@ -22,7 +22,7 @@ func ComposeMessage(group string, date time.Time, data Data) string {
 	weekDay := strings.ToLower(date.Weekday().String())
 
 	lesonsTable := data.Timetable[group][weekDay]
-	weekTypeInt, weekTypeStr := IsEvenWeek(time.Now())
+	weekTypeInt, weekTypeStr := IsEvenWeek(date)
 
 	msgText := fmt.Sprintf("Расписание для группы *%s*\n", group)
 	msgText += fmt.Sprintf("Неделя: *%v*\n", weekTypeStr)
