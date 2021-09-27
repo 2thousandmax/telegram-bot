@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
 	"strings"
 	"time"
@@ -13,7 +12,7 @@ func IsEvenWeek(now time.Time) (int, string) {
 
 		return 0, "Числитель"
 	}
-	
+
 	return 1, "Знаменатель"
 }
 
@@ -70,11 +69,4 @@ func weekDayRu(weekDay string) string {
 	}
 
 	return text
-}
-
-// itob returns an 8-byte big endian representation of v.
-func itob(v int) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
-	return b
 }

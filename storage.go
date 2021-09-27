@@ -1,54 +1,29 @@
 package main
 
-import (
-	"github.com/boltdb/bolt"
-)
+import "database/sql"
 
-type UserStorage struct {
-	db *bolt.DB
+type User struct {
+	Id          int `json:"id"`
+	TelegramId  int `json:"telegram_id"`
+	TelegramTag int `json:"telegram_tag"`
+	StudentId   int `json:"student_id"`
 }
 
-func NewUserStorage(db *bolt.DB) *UserStorage {
-	return &UserStorage{
-		db: db,
-	}
+type StorageProvider interface {
+	Users() StorageUserProvider
+	Schedule() StorageScheduleProvider
 }
 
-func (s *UserStorage) CreateUserBucket(id int) error {
-	err := s.db.Batch(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(itob(id))
-		return err
-	})
-
-	return err
+type StorageUserProvider interface{
+	Save(User) (int, error)
+	Get(id int) (User, error)
 }
 
-func (s *UserStorage) SaveGroup(id int, group string) error {
-	err := s.db.Batch(func(tx *bolt.Tx) error {
-		u, err := tx.CreateBucketIfNotExists(itob(id))
-		if err != nil {
-			return err
-		}
-
-		return u.Put([]byte("group"), []byte(group))
-	})
-
-	return err
+type Storage struct {
+	// Schedule ScheduleStorageProvider
 }
 
-func (s *UserStorage) GetGroup(id int) (string, error) {
-	var group string
-
-	err := s.db.Batch(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(itob(id))
-		if err != nil {
-			return err
-		}
-
-		group = string(b.Get([]byte("group")))
-
-		return nil
-	})
-
-	return group, err
+func NewStorage(*sql.DB) *Storage {
+	return &Storage{}
 }
+

@@ -9,8 +9,15 @@ import (
 )
 
 type Config struct {
-	Data     Data     `yaml:"data"`
-	Messages Messages `yaml:"messages"`
+	Postgres PostgresDatabaseConfig `yaml:"postgres"`
+	Bot      BotConfig              `yaml:"bot"`
+	Replies  Replies                `yaml:"replies"`
+}
+
+type BotConfig struct {
+}
+
+type Replies struct {
 }
 
 type Data struct {
@@ -51,7 +58,6 @@ func NewConfig(file string) (*Config, error) {
 	}
 
 	fmt.Println("Successfully unmarshalled")
-	fmt.Println(cfg.Data.Rings)
 	d, err := yaml.Marshal(&cfg)
 	if err != nil {
 		fmt.Printf("error: %v", err)

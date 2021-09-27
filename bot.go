@@ -10,18 +10,27 @@ import (
 )
 
 type Bot struct {
-	bot      *tgbotapi.BotAPI
-	data     Data
-	messages Messages
-	storage  *UserStorage
+	bot     *tgbotapi.BotAPI
+	config  Config
+	replies Replies
+	storage *Storage
 }
 
-func NewTelegramBot(bot *tgbotapi.BotAPI, d Data, msg Messages, storage *UserStorage) *Bot {
+func NewTelegramBot(config BotConfig, replies Replies, storage *Storage) *Bot {
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	log.Printf("Token: %s", token)
+
+	botApi, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Fatalf("Authentication error: %v", err)
+	}
+
+	botApi.Debug = true
+	log.Printf("Authorized on account %s", botApi.Self.UserName)
+
 	return &Bot{
-		bot:      bot,
-		data:     d,
-		messages: msg,
-		storage:  storage,
+		bot:     botApi,
+		storage: storage,
 	}
 }
 
