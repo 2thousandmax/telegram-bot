@@ -1,16 +1,16 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 const (
-	DBPingTimeout     int = 5
+	DBPingTimeout     int  = 5
 	DBPingMaxAttempts uint = 5
 )
 
@@ -23,10 +23,10 @@ type PostgresDatabaseConfig struct {
 	sslMode  string
 }
 
-func NewPostgresDatabase(p PostgresDatabaseConfig) (*sql.DB, error) {
-	db, err := sql.Open("postgres", p.toDataSourceName())
+func NewPostgresDatabase(p PostgresDatabaseConfig) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", p.toDataSourceName())
 	if err != nil {
-		return &sql.DB{}, err
+		return &sqlx.DB{}, fmt.Errorf("sqlx.Open: %v", err)
 	}
 
 	attempt := DBPingMaxAttempts
@@ -34,15 +34,15 @@ func NewPostgresDatabase(p PostgresDatabaseConfig) (*sql.DB, error) {
 		attempt--
 		err := db.Ping()
 		if err != nil {
-			log.Fatalln(err, "RETRIES LEFT:", attempt)
+			log.Println(err, "RETRIES LEFT:", attempt)
 
 			if attempt <= 0 {
-				time.Sleep( time.Duration(DBPingTimeout)* time.Second)
+				time.Sleep(time.Duration(DBPingTimeout) * time.Second)
 
 				continue
 			}
 
-			return nil, err
+			return nil, fmt.Errorf("NewPostgresDatabase: %v", err)
 		}
 
 		break

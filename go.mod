@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/jmoiron/sqlx v1.3.4
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.10.3
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect

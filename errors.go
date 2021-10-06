@@ -15,16 +15,17 @@ var (
 func (b *Bot) handleError(chatID int64, err error) {
 	var messageText string
 
-	switch err {
-	case ErrInvalidGroup:
-		messageText = b.messages.Errors.InvalidGroup
-	case ErrGroupNotFound:
-		messageText = b.messages.Errors.GroupNotFound
-	case ErrMessageOutdated:
-		messageText = b.messages.Errors.MessageOutdated
-	default:
-		messageText = b.messages.Errors.Default
-	}
+	// switch err {
+	// case ErrInvalidGroup:
+	// 	messageText = b.messages.Errors.InvalidGroup
+	// case ErrGroupNotFound:
+	// 	messageText = b.messages.Errors.GroupNotFound
+	// case ErrMessageOutdated:
+	// 	messageText = b.messages.Errors.MessageOutdated
+	// default:
+	// 	messageText = b.messages.Errors.Default
+	// }
+	messageText = b.Config.Errors["default"]
 
 	b.SendTextMessage(chatID, messageText, replyKeyboard)
 }

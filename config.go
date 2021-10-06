@@ -11,50 +11,43 @@ import (
 type Config struct {
 	Postgres PostgresDatabaseConfig `yaml:"postgres"`
 	Bot      BotConfig              `yaml:"bot"`
-	Replies  Replies                `yaml:"replies"`
+	Replies  map[string]string      `yaml:"replies"`
+	Errors   map[string]string      `yaml:"errors"`
 }
 
 type BotConfig struct {
+	Host string `yaml:"host"`
 }
 
-type Replies struct {
-}
 
-type Data struct {
-	Rings     []string                                 `yaml:"rings"`
-	Lecturers []string                                 `yaml:"lecturers"`
-	Classes   []string                                 `yaml:"classes"`
-	Controls  []string                                 `yaml:"controls"`
-	Timetable map[string]map[string][][][4]interface{} `yaml:"timetable"`
-}
+// type Data struct {
+// 	Rings     []string                                 `yaml:"rings"`
+// 	Lecturers []string                                 `yaml:"lecturers"`
+// 	Classes   []string                                 `yaml:"classes"`
+// 	Controls  []string                                 `yaml:"controls"`
+// 	Timetable map[string]map[string][][][4]interface{} `yaml:"timetable"`
+// }
 
-type Messages struct {
-	Responses Responses `yaml:"responses"`
-	Errors    Errors    `yaml:"errors"`
-}
+// type Messages struct {
+// 	Responses Responses `yaml:"responses"`
+// 	Errors    Errors    `yaml:"errors"`
+// }
 
-type Responses struct {
-	Start          string `yaml:"start"`
-	Setup          string `yaml:"setup"`
-	UnknownCommand string `yaml:"unknown_command"`
-}
+// type Responses struct {
+// 	Start          string `yaml:"start"`
+// 	Setup          string `yaml:"setup"`
+// 	UnknownCommand string `yaml:"unknown_command"`
+// }
 
-type Errors struct {
-	Default         string `yaml:"default"`
-	InvalidGroup    string `yaml:"invalid_group"`
-	GroupNotFound   string `yaml:"group_not_found"`
-	MessageOutdated string `yaml:"message_outdated"`
-}
-
-func NewConfig(file string) (*Config, error) {
+func NewConfig(file string) (Config, error) {
 	cfg := Config{}
 	f, err := ioutil.ReadFile(file)
 	if err != nil {
-		return &Config{}, err
+		return Config{}, err
 	}
 
 	if err := yaml.Unmarshal(f, &cfg); err != nil {
-		return &Config{}, err
+		return Config{}, err
 	}
 
 	fmt.Println("Successfully unmarshalled")
@@ -65,5 +58,5 @@ func NewConfig(file string) (*Config, error) {
 
 	fmt.Printf("--- dump:\n%s\n\n", string(d))
 
-	return &cfg, nil
+	return cfg, nil
 }

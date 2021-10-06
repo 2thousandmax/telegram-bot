@@ -7,7 +7,7 @@ import (
 func main() {
 	config, err := NewConfig("configs/config.yaml")
 	if err != nil {
-		log.Panic(err)
+		log.Fatalln(err)
 	}
 
 	db, err := NewPostgresDatabase(PostgresDatabaseConfig{
@@ -19,14 +19,14 @@ func main() {
 		sslMode:  "",
 	})
 	if err != nil {
-		log.Fatalf("Database error: %v", err)
+		log.Fatalln(err)
 	}
 
 	storage := NewStorage(db)
 
-	bot := NewTelegramBot(config.Bot, config.Replies, storage)
+	bot := NewTelegramBot(config, storage)
 
 	if err := bot.Start(); err != nil {
-		log.Fatalf("Bot error: %v", err)
+		log.Fatalf("bot.Start: %v", err)
 	}
 }
